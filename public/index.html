@@ -1,0 +1,2221 @@
+<!doctype html>
+<html lang="ro">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Royal Arena RP</title>
+  <link rel="icon" href="/assets/favicon.ico">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b0d10">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --card: rgba(20, 20, 30, .70);
+      --card2: rgba(18, 20, 28, .75);
+      --stroke: rgba(212, 175, 55, .25);
+      --stroke-strong: rgba(212, 175, 55, .45);
+      --text: #e7ebf0;
+      --muted: #8b95a1;
+      --violet: #d4af37;
+      --violet-neon: #ffd700;
+      --violet-deep: #b8860b;
+      --danger: #ff5d6c;
+      --ok: #2ecc71;
+      --radius: 16px;
+      --shadow: 0 0 25px rgba(212, 175, 55, .25);
+      --speed: .25s;
+      --appbar-h: 64px;
+      --sidebar-collapsed: 72px;
+      --sidebar-expanded: 240px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      color: var(--text);
+      background: var(--bg);
+      font: 400 16px/1.45 system-ui
+    }
+
+    .anim-in {
+      animation: fadeIn .35s ease both
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px) scale(.995)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .toasts {
+      position: fixed;
+      right: 18px;
+      top: 18px;
+      display: grid;
+      gap: 10px;
+      z-index: 60
+    }
+
+    .toast {
+      min-width: 220px;
+      max-width: 360px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(20, 22, 30, .90);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slidein .35s ease-out;
+      opacity: .98
+    }
+
+    .toast.ok {
+      border-color: var(--ok)
+    }
+
+    .toast.err {
+      border-color: var(--danger)
+    }
+
+    @keyframes slidein {
+      from {
+        transform: translateY(-8px);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+
+    .login-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px
+    }
+
+    .login-header h2 {
+      margin: 0;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: var(--violet-neon);
+      text-shadow: 0 0 12px rgba(212, 175, 55, .4)
+    }
+
+    .login-header img {
+      height: 36px;
+      border-radius: 8px
+    }
+
+    header.appbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      -webkit-backdrop-filter: blur(12px) saturate(1.4);
+      backdrop-filter: blur(12px) saturate(1.4);
+      background: rgba(15, 15, 25, .55);
+      border-bottom: 1px solid rgba(255, 255, 255, .08)
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: var(--appbar-h);
+      padding: 12px 16px
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      text-transform: uppercase
+    }
+
+    .brand img {
+      height: 28px
+    }
+
+    .bar .sp {
+      flex: 1
+    }
+
+    .btn-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--stroke);
+      background: rgba(20, 22, 30, .60);
+      color: #fff;
+      text-decoration: none;
+      transition: background .25s, border-color .25s, transform .25s, box-shadow .25s
+    }
+
+    .btn-top:hover {
+      background: rgba(212, 175, 55, .18);
+      border-color: var(--violet-deep);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(212, 175, 55, .18)
+    }
+
+    .btn-logout {
+      border-color: rgba(255, 99, 99, .35)
+    }
+
+    .btn-logout:hover {
+      background: rgba(255, 93, 108, .16);
+      border-color: #ff5d6c
+    }
+
+    .app {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      position: relative;
+      z-index: 1
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(700px 500px at 20% 25%, rgba(212, 175, 55, .25), transparent 70%), radial-gradient(600px 400px at 80% 30%, rgba(218, 165, 32, .20), transparent 70%), radial-gradient(800px 600px at 50% 80%, rgba(212, 175, 55, .22), transparent 70%), var(--bg);
+      filter: blur(70px)
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      min-height: calc(100vh - var(--appbar-h))
+    }
+
+    .sidebar {
+      position: sticky;
+      top: var(--appbar-h);
+      height: calc(100vh - var(--appbar-h));
+      width: var(--sidebar-collapsed);
+      transition: width var(--speed);
+      background: rgba(16, 20, 25, .60);
+      border-right: 1px solid var(--stroke);
+      overflow: hidden;
+      z-index: 10
+    }
+
+    .sidebar:hover {
+      width: var(--sidebar-expanded)
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      height: 100%
+    }
+
+    .nav .brand-mini {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--stroke);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700
+    }
+
+    .nav .brand-mini img {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%
+    }
+
+    .icon {
+      width: 28px;
+      display: grid;
+      place-items: center
+    }
+
+    .items {
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid transparent;
+      transition: background .35s, border-color .35s, transform .35s, box-shadow .35s
+    }
+
+    .item:hover {
+      background: rgba(212, 175, 55, .12);
+      border-color: var(--stroke);
+      transform: translateX(2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .15)
+    }
+
+    .item.active {
+      background: rgba(212, 175, 55, .18);
+      border-color: var(--violet-deep)
+    }
+
+    .label {
+      display: none
+    }
+
+    .sidebar:hover .label {
+      display: inline
+    }
+
+    .spacer {
+      flex: 1
+    }
+
+    main {
+      width: 100%;
+      padding: 18px 20px 28px;
+      overflow: auto;
+      height: calc(100vh - var(--appbar-h))
+    }
+
+    .hidden {
+      display: none !important
+    }
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .login-wrap {
+      position: fixed;
+      inset: var(--appbar-h) 0 0 0;
+      display: none;
+      z-index: 50;
+      background: #0b0d10;
+      overflow: hidden;
+      animation: fadeIn .25s;
+      display: grid;
+      place-items: center end;
+      padding-right: clamp(32px, 8vw, 140px);
+    }
+
+    .login-wrap::before,
+    .login-wrap::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(600px 400px at 15% 20%, rgba(212, 175, 55, .25), transparent 60%), radial-gradient(700px 500px at 85% 80%, rgba(218, 165, 32, .22), transparent 60%);
+      filter: blur(40px);
+      animation: orbsMove 18s ease-in-out infinite alternate;
+      pointer-events: none
+    }
+
+    .login-wrap::after {
+      background: radial-gradient(520px 380px at 80% 25%, rgba(212, 175, 55, .28), transparent 60%), radial-gradient(540px 360px at 20% 75%, rgba(184, 134, 11, .22), transparent 60%);
+      animation-duration: 22s;
+      mix-blend-mode: screen
+    }
+
+    @keyframes orbsMove {
+      0% {
+        transform: translate3d(-2%, -1%, 0)
+      }
+
+      100% {
+        transform: translate3d(2%, 1%, 0)
+      }
+    }
+
+    #login-stars {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: .55
+    }
+
+    .login-hero {
+      position: absolute;
+      left: 600px;
+      bottom: 0;
+      height: min(500vh, 900px);
+      width: auto;
+      z-index: 3;
+      pointer-events: none;
+      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, .45))
+    }
+
+    @media (max-width:900px) {
+      .login-hero {
+        display: none
+      }
+    }
+
+    .login-card {
+      z-index: 5;
+      width: min(70vw, 520px);
+      padding: 20px 24px;
+      border-radius: 20px;
+      background: #0f1320;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .55), 0 0 80px rgba(212, 175, 55, .20);
+      isolation: isolate;
+      transform-style: preserve-3d;
+      animation: scaleIn .28s ease;
+      justify-self: start;
+      margin-left: clamp(20px, 6vw, 140px)
+    }
+
+    .login-card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 22px;
+      padding: 2px;
+      background: conic-gradient(from 0deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, .35), rgba(212, 175, 55, .45), rgba(184, 134, 11, .35), rgba(0, 0, 0, 0));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(.95);
+        opacity: 0
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .neon-title h1 {
+      margin: 0 0 6px;
+      font-weight: 900;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      text-shadow: 0 0 30px rgba(212, 175, 55, .35), 0 0 8px rgba(212, 175, 55, .45)
+    }
+
+    .fields {
+      display: grid;
+      gap: 12px;
+      margin: 16px 0 8px
+    }
+
+    .field {
+      position: relative
+    }
+
+    .field .fa {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8b95a1
+    }
+
+    .input {
+      padding: 13px 14px 13px 38px;
+      border-radius: 14px;
+      width: 100%;
+      border: 1px solid rgba(212, 175, 55, .20);
+      background: linear-gradient(180deg, rgba(9, 11, 20, .85), rgba(10, 12, 22, .85));
+      color: #e7ebf0
+    }
+
+    .field:focus-within .input {
+      border-color: rgba(212, 175, 55, .55);
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, .28), 0 12px 30px rgba(212, 175, 55, .20) inset;
+      background: linear-gradient(180deg, rgba(12, 14, 26, .9), rgba(14, 16, 28, .9))
+    }
+
+    .field:focus-within .fa {
+      color: #ffe8a3;
+      text-shadow: 0 0 12px rgba(212, 175, 55, .6)
+    }
+
+    .sw {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+      margin: 2px 0 6px
+    }
+
+    .sw input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none
+    }
+
+    .sw .track {
+      width: 54px;
+      height: 28px;
+      border-radius: 999px;
+      position: relative;
+      background: #141826;
+      border: 1px solid rgba(212, 175, 55, .28);
+      box-shadow: inset 0 6px 18px rgba(0, 0, 0, .45)
+    }
+
+    .sw .knob {
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(65% 65% at 35% 35%, #fff, #cfcfe8);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+      transition: left .25s ease
+    }
+
+    .sw input:checked+.track {
+      background: linear-gradient(90deg, #b8860b 0%, #ffd700 100%);
+      box-shadow: 0 0 24px rgba(212, 175, 55, .45);
+      border-color: transparent
+    }
+
+    .sw input:checked+.track .knob {
+      left: 28px;
+      box-shadow: 0 0 18px rgba(212, 175, 55, .55)
+    }
+
+    .sw .sw-lbl {
+      font-size: 14px;
+      color: #c8cfda
+    }
+
+    .btn {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      border: 0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--violet-neon), var(--violet));
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(212, 175, 55, .40)
+    }
+
+    .btn:hover {
+      box-shadow: 0 8px 24px rgba(212, 175, 55, .35)
+    }
+
+    .btn:active {
+      transform: scale(.98)
+    }
+
+    .err {
+      color: var(--danger);
+      font-size: 13px
+    }
+
+    .login-card.shake {
+      animation: shake .45s both
+    }
+
+    @keyframes shake {
+
+      10%,
+      90% {
+        transform: translateX(-1px)
+      }
+
+      20%,
+      80% {
+        transform: translateX(2px)
+      }
+
+      30%,
+      50%,
+      70% {
+        transform: translateX(-4px)
+      }
+
+      40%,
+      60% {
+        transform: translateX(4px)
+      }
+    }
+
+    .landing {
+      position: relative;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 6vh 12px 24px;
+      min-height: calc(100vh - var(--appbar-h) - 100px)
+    }
+
+    .landing-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 720px) 1fr;
+      gap: 28px;
+      align-items: center
+    }
+
+    .landing h1 {
+      margin: 0 0 8px;
+      font-weight: 900;
+      letter-spacing: .5px;
+      font-size: clamp(48px, 7vw, 92px);
+      line-height: 1;
+      text-transform: uppercase
+    }
+
+    .landing .tagline {
+      margin: 0 0 14px;
+      font-weight: 900;
+      color: var(--violet-neon);
+      font-size: clamp(24px, 3.6vw, 40px);
+      text-transform: uppercase
+    }
+
+    .corner-info {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      display: grid;
+      gap: 8px;
+      justify-items: end;
+      z-index: 3
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(15, 15, 20, .85);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      font-weight: 900;
+      text-transform: uppercase;
+      border: 1px solid rgba(212, 175, 55, .35)
+    }
+
+    .stat-pill .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #666
+    }
+
+    .stat-pill.on .dot {
+      background: var(--ok)
+    }
+
+    .ip-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px dashed var(--stroke);
+      background: rgba(20, 22, 30, .70);
+      cursor: pointer;
+      color: #fff
+    }
+
+    .ip-chip:hover {
+      background: rgba(20, 22, 30, .90)
+    }
+
+    .scroll-hint {
+      position: absolute;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .home-more {
+      max-width: 1280px;
+      margin: 24px auto 0;
+      padding: 0 12px 80px;
+      display: grid;
+      gap: 36px
+    }
+
+    .section-title {
+      margin: 0;
+      font-weight: 900;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      font-size: clamp(22px, 2.6vw, 28px)
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px
+    }
+
+    @media (max-width:1100px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+    }
+
+    @media (max-width:560px) {
+      .features-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .feature {
+      border: 1px solid var(--stroke);
+      background: rgba(18, 20, 28, .7);
+      border-radius: 16px;
+      padding: 22px;
+      display: grid;
+      gap: 8px;
+      transform: translateY(10px);
+      opacity: .001
+    }
+
+    .feature i {
+      font-size: 28px;
+      color: var(--violet-neon)
+    }
+
+    .feature h4 {
+      margin: 2px 0 0;
+      font-weight: 900;
+      font-size: 20px
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px
+    }
+
+    .about {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 22px;
+      align-items: center
+    }
+
+    @media (max-width:900px) {
+      .about {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .about-media {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--stroke);
+      background: rgba(18, 20, 28, .7);
+      transform: translateY(10px);
+      opacity: .001
+    }
+
+    .about-media img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover
+    }
+
+    .about-text h2 {
+      margin: 0 0 8px;
+      font-weight: 900;
+      font-size: clamp(30px, 4.4vw, 46px);
+      text-transform: uppercase
+    }
+
+    .about-text p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px
+    }
+
+    .stats-video {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 22px;
+      align-items: start
+    }
+
+    @media (max-width:900px) {
+      .stats-video {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px
+    }
+
+    .stat {
+      border: 1px solid var(--stroke);
+      background: rgba(18, 20, 28, .7);
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+      transform: translateY(10px);
+      opacity: .001
+    }
+
+    .stat .v {
+      font-weight: 900;
+      font-size: clamp(26px, 6vw, 42px)
+    }
+
+    .stat .k {
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    .video-box {
+      position: relative;
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 16/9;
+      transform: translateY(10px);
+      opacity: .001
+    }
+
+    .video-box iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0
+    }
+
+    .cards-cta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px
+    }
+
+    @media (max-width:1100px) {
+      .cards-cta {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    @media (max-width:720px) {
+      .cards-cta {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .cta-card {
+      border: 1px solid var(--stroke);
+      background: rgba(18, 20, 28, .7);
+      border-radius: 16px;
+      overflow: hidden;
+      display: grid;
+      transform: translateY(10px);
+      opacity: .001
+    }
+
+    .cta-card .ph {
+      aspect-ratio: 16/9;
+      background: #222;
+      position: relative
+    }
+
+    .cta-card .ph img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .cta-card .txt {
+      padding: 16px;
+      display: grid;
+      gap: 8px
+    }
+
+    .cta-card h4 {
+      margin: 0;
+      font-weight: 900;
+      text-transform: uppercase;
+      font-size: 18px
+    }
+
+    .cta-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px
+    }
+
+    .reveal {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: opacity .6s ease, transform .6s ease
+    }
+
+    #store-wrap {
+      height: calc(100vh - var(--appbar-h));
+      overflow: hidden;
+      display: grid;
+      place-items: center
+    }
+
+    .store-scale {
+      transform-origin: top center
+    }
+
+    .hero {
+      position: relative;
+      width: min(380px, 32vh, 90vw);
+      margin: 0 auto 10px
+    }
+
+    .hero .face {
+      position: absolute;
+      right: -10px;
+      bottom: -10px;
+      width: 84px;
+      height: 84px;
+      border-radius: 14px;
+      border: 2px solid rgba(255, 255, 255, .12);
+      background: #111;
+      object-fit: cover;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+      transform: translate(-8px, -8px)
+    }
+
+    .hero .face.appear {
+      animation: pop .35s ease-out
+    }
+
+    @keyframes pop {
+      from {
+        transform: translate(-8px, -8px) scale(.85);
+        opacity: 0
+      }
+
+      to {
+        transform: translate(-8px, -8px) scale(1);
+        opacity: 1
+      }
+    }
+
+    .store {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+      place-items: center;
+      text-align: center;
+      place-content: center;
+      font-size: clamp(14px, 1.4vw, 16px)
+    }
+
+    .ap-store {
+      width: min(900px, 96vw);
+      margin: 0 auto;
+      display: grid;
+      gap: 12px
+    }
+
+    .ap-head {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .ap-box {
+      min-width: 260px;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      background: rgba(16, 20, 25, .7);
+      border: 1px solid var(--stroke);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      display: grid;
+      gap: 6px
+    }
+
+    .ap-box label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700
+    }
+
+    .ap-box input {
+      width: 160px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--stroke);
+      background: rgba(10, 10, 18, .7);
+      color: #fff;
+      text-align: center;
+      margin: 0 auto
+    }
+
+    .ap-bonusbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center
+    }
+
+    .ap-tier {
+      min-width: 120px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--stroke);
+      background: rgba(16, 20, 25, .7);
+      text-align: center;
+      cursor: pointer;
+      transition: transform .16s, box-shadow .2s, background .2s, border-color .2s
+    }
+
+    .ap-tier strong {
+      display: block;
+      color: #fff
+    }
+
+    .ap-tier small {
+      display: block;
+      color: var(--muted);
+      font-weight: 700
+    }
+
+    .ap-tier:hover {
+      background: rgba(212, 175, 55, .12);
+      box-shadow: 0 6px 18px rgba(212, 175, 55, .18);
+      transform: translateY(-1px)
+    }
+
+    .ap-tier:active {
+      transform: scale(.98)
+    }
+
+    .ap-tier.active {
+      border-color: var(--violet-deep);
+      background: rgba(212, 175, 55, .18)
+    }
+
+    .ap-lines {
+      display: grid;
+      gap: 8px;
+      border-top: 1px solid var(--stroke);
+      padding-top: 8px
+    }
+
+    .ap-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(16, 20, 25, .6);
+      border: 1px solid var(--stroke)
+    }
+
+    .ap-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    .ap-btn {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(20, 22, 30, .70);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform .12s, box-shadow .2s, background .2s
+    }
+
+    .ap-btn:hover {
+      background: rgba(212, 175, 55, .15);
+      box-shadow: 0 6px 18px rgba(212, 175, 55, .18)
+    }
+
+    .ap-btn:active {
+      transform: scale(.98)
+    }
+
+    .ap-btn.prim {
+      background: linear-gradient(135deg, var(--violet-neon), var(--violet));
+      border: 0
+    }
+
+    #packs-wrap {
+      min-height: calc(100vh - var(--appbar-h));
+      display: grid;
+      place-content: center;
+      gap: 18px;
+      margin-top: -18px
+    }
+
+    .packs-head {
+      position: sticky;
+      top: 0;
+      z-index: 25;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      margin: 0 0 12px;
+      background: rgba(17, 19, 24, .85);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--stroke)
+    }
+
+    .tab {
+      border: 1px solid var(--stroke);
+      background: rgba(20, 22, 30, .70);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform .12s, box-shadow .2s, background .2s
+    }
+
+    .tab:hover {
+      background: rgba(212, 175, 55, .15);
+      box-shadow: 0 6px 18px rgba(212, 175, 55, .18);
+      transform: translateY(-1px)
+    }
+
+    .tab:active {
+      transform: scale(.98)
+    }
+
+    .tab.active {
+      border-color: var(--violet-deep);
+      background: rgba(212, 175, 55, .18)
+    }
+
+    #view-packs.grid {
+      display: grid;
+      gap: 20px;
+      width: min(1200px, 92vw);
+      margin: 0 auto;
+      grid-template-columns: repeat(4, minmax(260px, 1fr))
+    }
+
+    @media (max-width:1200px) {
+      #view-packs.grid {
+        grid-template-columns: repeat(3, minmax(240px, 1fr))
+      }
+    }
+
+    @media (max-width:900px) {
+      #view-packs.grid {
+        grid-template-columns: repeat(2, minmax(240px, 1fr))
+      }
+    }
+
+    @media (max-width:560px) {
+      #view-packs.grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .card {
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px solid var(--violet-deep);
+      box-shadow: 0 0 20px rgba(212, 175, 55, .10);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .18s, box-shadow .25s, border-color .25s
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 32px rgba(212, 175, 55, .18)
+    }
+
+    .cover {
+      position: relative;
+      aspect-ratio: 16/10;
+      overflow: hidden
+    }
+
+    .cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .5s ease
+    }
+
+    .card:hover .cover img {
+      transform: scale(1.04)
+    }
+
+    .content {
+      padding: 14px;
+      display: grid;
+      gap: 6px
+    }
+
+    .name {
+      font-weight: 800;
+      font-size: 18px;
+      line-height: 1.2;
+      color: var(--violet-neon)
+    }
+
+    .price {
+      color: var(--violet);
+      font-weight: 700
+    }
+
+    .buy {
+      width: 100%;
+      border: 0;
+      cursor: pointer;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--violet-neon), var(--violet));
+      color: #fff;
+      box-shadow: 0 0 12px rgba(212, 175, 55, .30)
+    }
+
+    .buy:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(212, 175, 55, .45)
+    }
+
+    .swap {
+      animation: swap .28s ease both
+    }
+
+    @keyframes swap {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    #view-events {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px
+    }
+
+    .events-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .events-top .title {
+      font-weight: 900;
+      font-size: 22px;
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    .events-top .title i {
+      color: var(--violet-neon)
+    }
+
+    .btn-min {
+      border: 1px solid var(--stroke);
+      background: rgba(20, 22, 30, .70);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      transition: background .2s, box-shadow .2s, transform .12s
+    }
+
+    .btn-min:hover {
+      background: rgba(212, 175, 55, .15);
+      box-shadow: 0 6px 18px rgba(212, 175, 55, .18)
+    }
+
+    .btn-min:active {
+      transform: scale(.98)
+    }
+
+    .spin {
+      animation: rot .8s linear infinite
+    }
+
+    @keyframes rot {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .event-card {
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      background: rgba(18, 20, 28, .78);
+      overflow: hidden;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, .25)
+    }
+
+    .event-banner {
+      position: relative;
+      aspect-ratio: 16/6;
+      overflow: hidden;
+      background: #111
+    }
+
+    .event-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transform: scale(1.02)
+    }
+
+    .event-bar {
+      display: flex;
+      gap: 10px;
+      position: absolute;
+      right: 12px;
+      top: 12px
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(20, 22, 30, .70);
+      font-weight: 800
+    }
+
+    .event-body {
+      padding: 16px;
+      display: grid;
+      gap: 12px
+    }
+
+    .event-title {
+      margin: 0;
+      font-weight: 900;
+      font-size: clamp(18px, 3.2vw, 26px)
+    }
+
+    .event-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: space-between
+    }
+
+    .event-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    .btn-join {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(135deg, var(--violet-neon), var(--violet));
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer
+    }
+
+    .btn-leave {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--danger);
+      background: rgba(255, 93, 108, .12);
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer
+    }
+
+    .prose p {
+      margin: 0 0 8px
+    }
+
+    .prose strong {
+      font-weight: 900
+    }
+
+    .prose em {
+      font-style: italic
+    }
+
+    .prose ul {
+      margin: 6px 0;
+      padding-left: 20px
+    }
+
+    .prose li {
+      margin: 2px 0
+    }
+
+    #view-players {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px
+    }
+
+    .players-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between
+    }
+
+    .players-top .title {
+      font-weight: 900;
+      font-size: 22px;
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    .players-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px
+    }
+
+    @media (max-width:1000px) {
+      .players-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+    }
+
+    @media (max-width:640px) {
+      .players-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .player {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--stroke);
+      background: rgba(18, 20, 28, .78);
+      border-radius: 14px;
+      padding: 10px
+    }
+
+    .player img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #111;
+      border: 1px solid rgba(255, 255, 255, .08)
+    }
+
+    .player .nm {
+      font-weight: 800
+    }
+
+    .player .meta {
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .pill-mini {
+      padding: 6px 10px;
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      background: rgba(20, 22, 30, .7);
+      font-weight: 800
+    }
+
+    #view-settings {
+      max-width: 1500px;
+      margin: 0 auto;
+      display: block
+    }
+
+    .set-grid {
+      display: grid;
+      grid-template-columns: 1.25fr .95fr;
+      gap: 28px
+    }
+
+    @media (max-width:1050px) {
+      .set-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .set-card {
+      border: 1px solid var(--stroke-strong);
+      background: linear-gradient(180deg, rgba(18, 20, 28, .86), rgba(18, 20, 28, .72));
+      border-radius: 22px;
+      box-shadow: 0 22px 50px rgba(0, 0, 0, .3)
+    }
+
+    .set-card .hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--stroke)
+    }
+
+    .set-card .hd h3 {
+      margin: 0;
+      font-weight: 900;
+      letter-spacing: .3px;
+      font-size: 22px
+    }
+
+    .set-card .bd {
+      padding: 22px 20px
+    }
+
+    .pf-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 18px;
+      align-items: center
+    }
+
+    .pf-avatar {
+      width: 148px;
+      height: 148px;
+      border-radius: 18px;
+      border: 1px solid var(--stroke);
+      object-fit: cover;
+      background: #111
+    }
+
+    .pf-chips {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(20, 22, 30, .7);
+      font-weight: 800;
+      font-size: 15px
+    }
+
+    .chip i {
+      color: var(--violet-neon);
+      font-size: 16px
+    }
+
+    .kv-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px
+    }
+
+    @media (max-width:680px) {
+      .kv-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .kv {
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(16, 20, 25, .60)
+    }
+
+    .kv .k {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px
+    }
+
+    .kv .v {
+      font-weight: 800;
+      font-size: 20px
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    @media (max-width:680px) {
+      .form-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .fld {
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(16, 20, 25, .60)
+    }
+
+    .lbl {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px
+    }
+
+    .input2 {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(10, 10, 18, .70);
+      color: var(--text);
+      font-size: 16px
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 10px
+    }
+
+    #btn-upload {
+      display: none
+    }
+
+    aside.sidebar .items #btn-logout-side:hover {
+      background: rgba(255, 93, 108, .16);
+      border-color: var(--danger);
+      box-shadow: 0 6px 18px rgba(255, 93, 108, .18);
+      transform: translateX(2px)
+    }
+
+    body.noscroll,
+    html.noscroll {
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="toasts" id="toasts"></div>
+
+  <div class="app" id="app">
+    <header class="appbar">
+      <div class="bar">
+        <div class="brand">
+          <img src="assets/logo (2).png" alt="logo">
+          <span>Royal Arena RP</span>
+        </div>
+        <div class="sp"></div>
+        <div id="top-profile" style="display:none;align-items:center;gap:10px">
+          <img id="top-avatar" src="assets/no-pfp.svg" alt="avatar"
+            style="width:36px;height:36px;border-radius:50%;object-fit:cover">
+          <span id="top-name" style="font-weight:600"></span>
+        </div>
+        <a id="btn-home-top" class="btn-top" target="_blank" rel="noopener"><i class="fa fa-house"></i> Acasă</a>
+        <a id="btn-discord-top" class="btn-top" target="_blank" rel="noopener"><i class="fa-brands fa-discord"></i>
+          Discord</a>
+        <a href="#" id="btn-logout-top" class="btn-top btn-logout" style="display:none"><i
+            class="fa fa-right-from-bracket"></i> Logout</a>
+      </div>
+    </header>
+
+    <!-- LOGIN -->
+    <section class="login-wrap" id="login" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <canvas id="login-stars" aria-hidden="true"></canvas>
+      <img class="login-hero" src="assets/login-art.png" alt="art login" onerror="this.style.display='none'">
+      <div class="login-card" id="loginCard">
+        <div class="neon-title">
+          <h1 id="loginTitle">Autentificare</h1>
+        </div>
+        <p class="muted">Autentifică-te pentru a continua.</p>
+        <div class="fields">
+          <div class="field"><i class="fa fa-envelope"></i><input class="input" id="email" type="email"
+              placeholder="Email-ul de pe joc"></div>
+          <div class="field"><i class="fa fa-lock"></i><input class="input" id="password" type="password"
+              placeholder="Parolă"></div>
+          <label class="sw" for="rememberMe">
+            <input type="checkbox" id="rememberMe">
+            <span class="track"><span class="knob"></span></span>
+            <span class="sw-lbl">Ține-mă minte</span>
+          </label>
+          <button class="btn" id="btn-login" type="button"><i class="fa fa-right-to-bracket"></i> Intră pe cont</button>
+        </div>
+        <div class="err" id="auth-msg"></div>
+      </div>
+    </section>
+
+    <div class="shell">
+      <!-- Sidebar -->
+      <aside class="sidebar" aria-label="Navigare">
+        <nav class="nav">
+          <a href="#" class="brand-mini">
+            <span class="icon"><img id="sidebar-avatar" src="assets/no-pfp.svg" alt=""></span>
+            <span class="label" id="sidebar-name">Vizitator</span>
+          </a>
+          <div class="items">
+            <a href="#" class="item active" data-view="home"><span class="icon"><i class="fa fa-house"></i></span><span
+                class="label">Acasă</span></a>
+            <a href="#" class="item" data-view="players"><span class="icon"><i class="fa fa-users"></i></span><span
+                class="label">Jucători</span></a>
+            <a href="#" class="item" data-view="store"><span class="icon"><i class="fa fa-store"></i></span><span
+                class="label">Magazin</span></a>
+            <a href="#" class="item" data-view="packs"><span class="icon"><i class="fa fa-gem"></i></span><span
+                class="label">Pachete</span></a>
+            <a href="#" class="item" data-view="events"><span class="icon"><i class="fa fa-bullhorn"></i></span><span
+                class="label">Evenimente</span></a>
+            <div class="spacer"></div>
+            <a href="#" class="item" data-view="settings"><span class="icon"><i class="fa fa-gear"></i></span><span
+                class="label">Setări</span></a>
+            <a href="#" id="btn-logout-side" class="item" style="display:none"><span class="icon"><i
+                  class="fa fa-right-from-bracket"></i></span><span class="label">Logout</span></a>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Content -->
+      <main>
+        <!-- HOME -->
+        <section id="view-home" class="landing anim-in">
+          <div class="landing-grid">
+            <div>
+              <h1>Royal Arena ROLEPLAY</h1>
+              <div class="tagline">Trăiește povestea ta</div>
+              <p class="muted">Conectează-te, creează-ți gașca și trăiește povești alături de prieteni.</p>
+              <div class="ctas"><button class="btn" id="btn-cta-connect"><i class="fa fa-plug"></i>
+                  Conectează-te</button></div>
+            </div>
+            <div class="right"><img class="art" src="assets/character.png" alt="logo"
+                style="max-width:min(500px,92vw);filter:drop-shadow(0 12px 40px rgba(0,0,0,.45))"></div>
+          </div>
+        </section>
+
+        <!-- HOME extra -->
+        <section class="home-more" id="home-more">
+          <h2 class="section-title">Ce găsești pe server</h2>
+          <div class="features-grid">
+            <article class="feature reveal-on"><i class="fa-solid fa-sitemap"></i>
+              <h4>Facțiuni diverse</h4>
+              <p>Alege medic, polițist sau gangster. Eventuri și recompense unice.</p>
+            </article>
+            <article class="feature reveal-on"><i class="fa-solid fa-briefcase"></i>
+              <h4>Job-uri multiple</h4>
+              <p>Legal sau ilegal. Progres și câștiguri constante.</p>
+            </article>
+            <article class="feature reveal-on"><i class="fa-solid fa-car-side"></i>
+              <h4>Vehicule & handling</h4>
+              <p>Setări echilibrate. Control plăcut.</p>
+            </article>
+            <article class="feature reveal-on"><i class="fa-solid fa-bolt"></i>
+              <h4>Experiență inedită</h4>
+              <p>Story, eventuri, comunitate activă și suport.</p>
+            </article>
+          </div>
+
+          <div class="about">
+            <div class="about-media reveal-on"><img src="assets/home/about.jpg" alt="Royal city"
+                onerror="this.style.display='none'"></div>
+            <div class="about-text">
+              <h2>Despre comunitate</h2>
+              <p>Experiență GTA V RAGE:MP orientată pe poveste, economie și roleplay curat. Server activ, staff
+                implicat, update-uri periodice.</p>
+            </div>
+          </div>
+
+          <div class="stats-video">
+            <div class="stats-grid">
+              <div class="stat reveal-on">
+                <div class="v" id="stat-members">56K</div>
+                <div class="k">Membri în comunitate</div>
+              </div>
+              <div class="stat reveal-on">
+                <div class="v" id="stat-daily">3.5K</div>
+                <div class="k">Playeri unici zilnic</div>
+              </div>
+              <div class="stat reveal-on">
+                <div class="v">7 ANI</div>
+                <div class="k">De activitate</div>
+              </div>
+              <div class="stat reveal-on">
+                <div class="v">#1</div>
+                <div class="k">Experiență Royal</div>
+              </div>
+            </div>
+            <div class="video-box reveal-on"><iframe src="https://www.youtube.com/embed/VIDEO_ID"
+                title="Trailer Royal Arena RP"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe></div>
+          </div>
+
+          <div class="cards-cta">
+            <article class="cta-card reveal-on">
+              <div class="ph"><img src="assets/home/factions.jpg" alt="Aplică în facțiuni"
+                  onerror="this.style.display='none'"></div>
+              <div class="txt">
+                <h4>Aplică în facțiuni</h4>
+                <p>Intră în organizația preferată și fă diferența în oraș.</p>
+              </div>
+            </article>
+            <article class="cta-card reveal-on">
+              <div class="ph"><img src="assets/home/vip.jpg" alt="Beneficii VIP" onerror="this.style.display='none'">
+              </div>
+              <div class="txt">
+                <h4>Beneficii V.I.P.</h4>
+                <p>Acces prioritar și bonusuri speciale pentru susținători.</p>
+              </div>
+            </article>
+            <article class="cta-card reveal-on">
+              <div class="ph"><img src="assets/home/shop.jpg" alt="Shop" onerror="this.style.display='none'"></div>
+              <div class="txt">
+                <h4>Shop</h4>
+                <p>Obține iteme și servicii. Plăți Stripe.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- STORE -->
+        <section id="store-wrap" class="hidden">
+          <div class="store-scale anim-in">
+            <section class="hero">
+              <img src="assets/dollar.png" alt="Banner">
+              <img id="hero-face" class="face" src="assets/no-pfp.svg" alt="avatar">
+            </section>
+            <section class="store" id="view-store">
+              <div class="ap-store">
+                <div class="ap-head">
+                  <div class="ap-box"><label><i class="fa-solid fa-gem"></i> REDBUCKS</label><input id="ap-points-input"
+                      type="number" min="1" max="999" step="1" value="100"></div>
+                  <i class="fa-solid fa-arrow-right"></i>
+                  <div class="ap-box"><label><i class="fa-solid fa-euro-sign"></i> EURO</label><input id="ap-eur-input"
+                      type="number" min="1" max="999" step="1" value="100"></div>
+                </div>
+                <div class="ap-bonusbar" id="ap-bonusbar"></div>
+                <div class="ap-lines">
+                  <div class="ap-line"><span>BONUS</span><strong id="ap-bonus">0 RC</strong></div>
+                  <div class="ap-line"><span>TOTAL REDBUCKS</span><strong id="ap-total">100 RB</strong></div>
+                  <div class="ap-line"><span>COSTUL TOTAL</span><strong id="ap-euros">100 €</strong></div>
+                </div>
+                <div class="ap-actions">
+                  <button class="ap-btn" id="btn-back-store"><i class="fa fa-arrow-left"></i> ÎNAPOI</button>
+                  <div class="sp"></div>
+                  <button class="ap-btn prim" id="btn-next-store">URMĂTOAREA ETAPĂ <i
+                      class="fa fa-arrow-right"></i></button>
+                </div>
+                <input id="eurInput" type="number" min="1" max="999" step="1" value="100"
+                  style="position:absolute;left:-9999px">
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- PACKS -->
+        <div id="packs-wrap" class="hidden">
+          <div class="packs-head">
+            <button class="tab active" data-tab="redbucks">Redbucks</button>
+            <button class="tab" data-tab="case">Case</button>
+            <button class="tab" data-tab="sanctiuni">Sancțiuni</button>
+          </div>
+          <section class="grid" id="view-packs"></section>
+        </div>
+
+        <!-- PLAYERS -->
+        <section id="view-players" class="hidden">
+          <div class="players-top">
+            <div class="title"><i class="fa fa-users"></i> Jucători Online <span id="players-count" class="pill-mini"
+                style="margin-left:8px">0</span></div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="players-search" class="input2" placeholder="Caută nume..." style="width:220px">
+              <button class="btn-min" id="btn-refresh-players"><i class="fa fa-rotate"></i> Refresh</button>
+            </div>
+          </div>
+          <div id="players-grid" class="players-grid"></div>
+        </section>
+
+        <!-- EVENTS -->
+        <section id="view-events" class="hidden">
+          <div id="events-list"></div>
+          <div class="events-top">
+            <div class="title"><i class="fa fa-bullhorn"></i> Evenimente</div>
+            <button class="btn-min" id="btn-refresh-events"><i id="refIcon" class="fa fa-rotate"></i> Refresh</button>
+          </div>
+          <div id="events-grid" style="display:grid;gap:16px"></div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section id="view-settings" class="hidden">
+          <div class="set-grid anim-in">
+            <article class="set-card">
+              <div class="hd">
+                <h3>Profil</h3>
+              </div>
+              <div class="bd">
+                <div class="pf-head">
+                  <img id="set-charface" class="pf-avatar" src="assets/no-pfp.svg" alt="avatar"
+                    onerror="this.src='assets/no-pfp.svg'">
+                  <div>
+                    <div class="pf-chips">
+                      <span class="chip"><i class="fa-solid fa-user"></i><span id="acc-login">—</span></span>
+                      <span class="chip"><i class="fa-solid fa-gem"></i><span id="acc-rb">0</span> RC</span>
+                      <span class="chip"><i class="fa-solid fa-crown"></i>VIP lvl <span id="acc-vip">0</span></span>
+                      <span id="chip-vipdate" class="chip" style="display:none"><i
+                          class="fa-regular fa-calendar"></i>până la <span id="acc-vipdate">—</span></span>
+                    </div>
+                    <div class="muted" style="margin-top:6px" id="stat-email">—</div>
+                  </div>
+                </div>
+                <div class="kv-grid">
+                  <div class="kv">
+                    <div class="k"><i class="fa-solid fa-sack-dollar"></i> Bani în mână</div>
+                    <div class="v" id="stat-money">—</div>
+                  </div>
+                  <div class="kv">
+                    <div class="k"><i class="fa-solid fa-piggy-bank"></i> Bani în bancă</div>
+                    <div class="v" id="stat-bank">—</div>
+                  </div>
+                  <div class="kv">
+                    <div class="k"><i class="fa-solid fa-users"></i> Facțiune</div>
+                    <div class="v" id="stat-faction">—</div>
+                  </div>
+                  <div class="kv">
+                    <div class="k"><i class="fa-solid fa-shield"></i> Admin lvl</div>
+                    <div class="v" id="stat-admin">—</div>
+                  </div>
+                  <div class="kv">
+                    <div class="k"><i class="fa-solid fa-star"></i> Nivel</div>
+                    <div class="v" id="stat-level">—</div>
+                  </div>
+                  <div class="kv">
+                    <div class="k"><i class="fa-solid fa-envelope"></i> Email</div>
+                    <div class="v" id="stat-email-kv">—</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="set-card">
+              <div class="hd">
+                <h3>Cont</h3>
+              </div>
+              <div class="bd">
+                <div class="fld">
+                  <div class="lbl"><i class="fa-solid fa-envelope"></i> Email</div><input id="set-email" class="input2"
+                    type="email" placeholder="email@exemplu.ro">
+                </div>
+                <div class="form-grid" style="margin-top:12px">
+                  <div class="fld">
+                    <div class="lbl"><i class="fa-solid fa-key"></i> Parolă nouă</div><input id="set-pass"
+                      class="input2" type="password" placeholder="Minim 6 caractere">
+                  </div>
+                  <div class="fld">
+                    <div class="lbl"><i class="fa-solid fa-check-double"></i> Confirmă</div><input id="set-pass2"
+                      class="input2" type="password" placeholder="Repetă parola">
+                  </div>
+                </div>
+                <div class="fld" style="margin-top:12px">
+                  <div class="lbl"><i class="fa-solid fa-image"></i> Avatar</div>
+                  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+                    <img id="set-avatar" class="pf-avatar" style="width:64px;height:64px" src="assets/no-pfp.svg"
+                      alt="avatar" onerror="this.src='assets/no-pfp.svg'">
+                    <input id="set-file" type="file" accept="image/*" style="position:absolute;left:-9999px">
+                    <label class="btn-min" for="set-file"><i class="fa fa-image"></i> Alege imagine</label>
+                    <span id="file-name" class="muted">Niciun fișier</span>
+                    <button id="btn-upload" class="btn-min"><i class="fa fa-upload"></i> Încarcă</button>
+                    <div style="flex:1"></div>
+                    <button id="btn-save" class="btn-min"><i class="fa fa-floppy-disk"></i> Salvează</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Utils
+    const $ = q => document.querySelector(q), $$ = q => document.querySelectorAll(q), fmtInt = n => Number(n).toLocaleString('ro-RO'), fmtEur = n => Number(n).toFixed(2);
+    const setImg = (el, src) => { if (!el) return; el.onerror = () => { el.onerror = null; el.src = 'assets/no-pfp.svg' }; el.src = src };
+    let stripe; const state = { authed: !1, currentTab: 'redbucks' };
+    function toast(m, t = 'ok', ms = 2200) { const d = document.createElement('div'); d.className = `toast ${t}`, d.innerHTML = `${t === 'ok' ? '✅' : '⚠️'} <div>${m}</div>`; ($('#toasts') || document.body).appendChild(d); setTimeout(() => { d.style.transition = 'opacity .25s,transform .25s'; d.style.opacity = '0'; d.style.transform = 'translateY(-6px)'; setTimeout(() => d.remove(), 260) }, ms) }
+
+    // Header + sidebar profile
+    async function refreshSidebarProfile() {
+      const top = $('#top-profile');
+      if (!state.authed) {
+        setImg($('#sidebar-avatar'), 'assets/no-pfp.svg');
+        $('#sidebar-name').textContent = 'Vizitator';
+        setImg($('#top-avatar'), 'assets/no-pfp.svg');
+        $('#top-name').textContent = '';
+        if (top) top.style.display = 'none';
+        return;
+      }
+      try {
+        const r = await fetch('/api/user/profile', { credentials: 'include' }); if (!r.ok) throw 0;
+        const d = await r.json();
+        const face = d.character_uuid ? `/api/char-face/${d.character_uuid}.png` : (d.character_image_url || d.avatar_url || 'assets/no-pfp.svg');
+        $('#sidebar-name').textContent = d.login || 'Jucător';
+        setImg($('#sidebar-avatar'), face);
+        const hf = $('#hero-face'); if (hf) { setImg(hf, face); hf.classList.add('appear'); }
+        setImg($('#top-avatar'), face);
+        $('#top-name').textContent = d.login || '';
+        if (top) top.style.display = '';
+      } catch { $('#sidebar-name').textContent = 'Jucător' }
+    }
+    function updateAuthUI() {
+      ['#btn-logout-top', '#btn-logout-side'].forEach(s => $(s).style.display = state.authed ? '' : 'none');
+      $('#top-profile').style.display = state.authed ? '' : 'none';
+      refreshSidebarProfile();
+    }
+
+    // Auth
+    async function logout(e) { e?.preventDefault(); try { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); } catch { } state.authed = !1, localStorage.removeItem('rememberLogin');['#view-home', '#home-more', '#store-wrap', '#packs-wrap', '#view-events', '#view-settings', '#view-players'].forEach(s => $(s)?.classList.add('hidden')); showLogin(); updateAuthUI(); toast('Delogat') }
+    $('#btn-logout-top')?.addEventListener('click', logout); $('#btn-logout-side')?.addEventListener('click', logout);
+
+    // Store catalog
+    const CATALOG = { redbucks: [{ id: "rb10", name: "10 RB", redbucks: 10, price_cents: 1000 }, { id: "rb25", name: "25 RB", redbucks: 25, price_cents: 2500 }, { id: "rb60", name: "60 RB", redbucks: 60, price_cents: 6000 }, { id: "rb120", name: "120 RB", redbucks: 120, price_cents: 12000 }, { id: "rb250", name: "250 RB", redbucks: 250, price_cents: 25000 }, { id: "rb600", name: "600 RB", redbucks: 600, price_cents: 60000 }, { id: "rb1200", name: "1200 RB", redbucks: 1200, price_cents: 120000 }, { id: "rb2500", name: "2500 RB", redbucks: 2500, price_cents: 250000 }], case: [{ id: "4", name: "Casă #4", note: "Grapeseed", price_cents: 19900 }, { id: "40", name: "Casă #40", note: "Paleto", price_cents: 9900 }], sanctiuni: [{ id: "san-unban", name: "Unban permanent", price_cents: 2500 }] };
+    const COVER_IMG = id => `assets/packs/${id}.jpg`, BONUS_TIERS = [{ min: 1, pct: 0 }, { min: 10, pct: 5 }, { min: 20, pct: 10 }, { min: 50, pct: 15 }, { min: 100, pct: 20 }, { min: 200, pct: 25 }], MAX_EUROS = 999;
+    function tierForEuros(e) { let t = BONUS_TIERS[0]; for (const x of BONUS_TIERS) if (e >= x.min) t = x; return t }
+    function buildBonusBar() { const b = $('#ap-bonusbar'); if (!b) return; b.innerHTML = ''; BONUS_TIERS.forEach(t => { const e = document.createElement('button'); e.className = 'ap-tier', e.innerHTML = `<strong>+${t.pct}%</strong><small>DE LA ${t.min}€</small>`, e.onclick = () => { $('#eurInput').value = t.min; refreshFromEuros() }, b.appendChild(e) }) }
+    function applyStoreValues(e) { e = Math.min(999, Math.max(1, Math.floor(e))); const t = tierForEuros(e), bonus = Math.round(e * t.pct / 100), tot = e + bonus; $('#ap-bonus').textContent = `${fmtInt(bonus)} RB`; $('#ap-total').textContent = `${fmtInt(tot)} RB`; $('#ap-euros').textContent = `${fmtEur(e)} €`; $('#ap-eur-input').value = e; $('#ap-points-input').value = e; $('#eurInput').value = e;[...document.querySelectorAll('#ap-bonusbar .ap-tier')].forEach((el, i) => el.classList.toggle('active', e >= BONUS_TIERS[i].min)) }
+    function refreshFromEuros() { applyStoreValues(Math.max(1, Math.min(MAX_EUROS, parseInt($('#eurInput').value) || 1))) }
+    function fitStore() { const w = $('#store-wrap'), b = w?.querySelector('.store-scale'); if (!w || !b) return; b.style.transform = 'scale(1)'; const a = w.getBoundingClientRect(), c = b.getBoundingClientRect(), p = 16; const sc = Math.max(.6, Math.min((a.width - p) / c.width, (a.height - p) / c.height, 1)); b.style.transform = `scale(${sc})` }
+    addEventListener('resize', fitStore);
+
+    // Stripe
+    async function apiStripeConfig() { try { const r = await fetch('/api/stripe/config'); if (!r.ok) return; const d = await r.json(); if (!window.Stripe || !d?.publishableKey) return; stripe = Stripe(d.publishableKey) } catch { } }
+    async function me() { const r = await fetch('/api/me', { credentials: 'include' }); return (await r.json()).user; }
+    async function login() { const e = $('#email').value.trim(), p = $('#password').value, r = $('#rememberMe').checked, b = $('#btn-login'), m = $('#auth-msg'); m.textContent = '', b.disabled = !0; try { const r2 = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email: e, password: p, remember: r }) }); const d = await r2.json(); if (d.ok) { state.authed = !0; updateAuthUI(); hideLogin(); renderPackages(); toast('Conectat'); showView('home') } else m.textContent = d.error || 'Eroare' } catch { m.textContent = 'Eroare rețea' } finally { b.disabled = !1 } }
+    function showLogin() { $('#login').style.display = 'grid' } function hideLogin() { $('#login').style.display = 'none' }
+    $('#btn-login').addEventListener('click', login); document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#login').style.display !== 'none') login() });
+    function setActiveItem(v) { $$('.item').forEach(a => { const on = a.dataset.view === v; a.classList.toggle('active', on); if (a.dataset.view) a.setAttribute('aria-current', on ? 'page' : 'false') }) }
+
+    // Profile view
+    async function loadProfile() {
+      try {
+        const r = await fetch('/api/user/profile', { credentials: 'include' }); if (!r.ok) return;
+        const d = await r.json();
+        const face = d.character_uuid ? `/api/char-face/${d.character_uuid}.png` : (d.character_image_url || d.avatar_url || 'assets/no-pfp.svg');
+        setImg($('#set-charface'), face);
+        setImg($('#set-avatar'), face);
+
+        $('#acc-login').textContent = d.login || '—';
+        $('#acc-rb').textContent = d.redbucks || 0;
+        $('#acc-vip').textContent = d.viplvl || 0;
+        {
+          const chip = $('#chip-vipdate'), val = $('#acc-vipdate');
+          if (Number(d.viplvl) > 0 && d.vipdate) { const dt = new Date(d.vipdate); val.textContent = isNaN(dt) ? d.vipdate : dt.toLocaleString('ro-RO', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); chip.style.display = '' }
+          else { chip.style.display = 'none'; val.textContent = '—' }
+        }
+        $('#stat-email').textContent = d.email || '—';
+        $('#stat-email-kv').textContent = d.email || '—';
+        $('#set-email').value = d.email || '';
+        $('#stat-money').textContent = d.character?.money ?? '—';
+        $('#stat-bank').textContent = d.character?.bank ?? '—';
+        $('#stat-faction').textContent = d.character?.fraction ?? 'Civil';
+        $('#stat-admin').textContent = (d.character?.adminlvl === 0 || d.character?.adminlvl == null) ? 'Nimic' : d.character.adminlvl;
+        $('#stat-level').textContent = d.character?.lvl ?? '—';
+      } catch { }
+    }
+
+    // Players
+    async function loadPlayers() {
+      try {
+        const r = await fetch('/api/ragemp/players'); const d = await r.json();
+        const list = d.players || []; $('#players-count').textContent = list.length;
+        const grid = $('#players-grid'); grid.innerHTML = '';
+        const q = ($('#players-search').value || '').toLowerCase();
+        list.filter(p => p.name?.toLowerCase().includes(q)).forEach(p => {
+          const el = document.createElement('div'); el.className = 'player';
+          el.innerHTML = `<img src="assets/no-pfp.svg" alt=""><div><div class="nm">${p.name || '—'}</div><div class="meta">Ping ${p.ping ?? '—'}</div></div><span class="pill-mini">ID ${p.id || '—'}</span>`;
+          grid.appendChild(el);
+        });
+      } catch { $('#players-count').textContent = '0'; $('#players-grid').innerHTML = ''; }
+    }
+    $('#btn-refresh-players').onclick = loadPlayers; $('#players-search').oninput = loadPlayers;
+
+    // Events
+    async function loadEvents() {
+      try {
+        const r = await fetch('/api/events'); if (!r.ok) return;
+        const data = await r.json(); const root = $('#events-grid'); root.innerHTML = '';
+        data.events.forEach(ev => {
+          const el = document.createElement('article'); el.className = 'event-card';
+          el.innerHTML = `<div class="event-banner"><img src="${ev.image}" alt=""></div>
+                <div class="event-body">
+                  <h3 class="event-title">${ev.title}</h3>
+                  <div class="prose"><p>${ev.description || ''}</p></div>
+                  <div class="event-meta"><div class="muted"><i class="fa-regular fa-calendar"></i> ${ev.when || ''}</div>
+                    <div class="event-actions">
+                      <button class="${ev.joined ? 'btn-leave' : 'btn-join'}" data-id="${ev.id}">${ev.joined ? 'Părăsește' : 'Participă'}</button>
+                      <span class="pill">${ev.count || 0} înscriși</span>
+                    </div>
+                  </div>
+                </div>`;
+          root.appendChild(el);
+        });
+      } catch { }
+    }
+    document.addEventListener('click', async e => {
+      const j = e.target.closest('.btn-join'); if (j) {
+        const id = j.dataset.id;
+        j.disabled = true; try { await fetch('/api/events/join', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); toast('Înscris la eveniment'); loadEvents(); } finally { j.disabled = false; }
+      }
+      const l = e.target.closest('.btn-leave'); if (l) {
+        const id = l.dataset.id;
+        l.disabled = true; try { await fetch('/api/events/leave', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); toast('Ai ieșit din eveniment'); loadEvents(); } finally { l.disabled = false; }
+      }
+    });
+    $('#btn-refresh-events').onclick = () => { const i = $('#refIcon'); i.classList.add('spin'); loadEvents().finally(() => i.classList.remove('spin')); };
+
+    // Navigation
+    function showView(v) {
+      if (!state.authed) { showLogin(); return }
+      ['#view-home', '#home-more', '#store-wrap', '#packs-wrap', '#view-events', '#view-settings', '#view-players'].forEach(s => $(s).classList.add('hidden'));
+      if (v === 'home') { $('#view-home').classList.remove('hidden'); $('#home-more').classList.add('hidden'); document.documentElement.classList.add('noscroll'); document.body.classList.add('noscroll'); }
+      else { document.documentElement.classList.remove('noscroll'); document.body.classList.remove('noscroll'); }
+      if (v === 'settings') { $('#view-settings').classList.remove('hidden'); loadProfile(); }
+      if (v === 'store') { const s = $('#store-wrap'); s.classList.remove('hidden'); buildBonusBar(); refreshFromEuros(); requestAnimationFrame(fitStore) }
+      if (v === 'packs') $('#packs-wrap').classList.remove('hidden');
+      if (v === 'events') { $('#view-events').classList.remove('hidden'); loadEvents(); }
+      if (v === 'players') { $('#view-players').classList.remove('hidden'); loadPlayers(); }
+      setActiveItem(v)
+    }
+
+    // Sidebar clicks
+    document.addEventListener('click', e => { const a = e.target.closest('.item[data-view]'); if (!a) return; e.preventDefault(); state.authed ? showView(a.dataset.view) : showLogin() });
+    $('#btn-cta-connect').onclick = () => state.authed ? showView('store') : showLogin();
+    $('#ap-eur-input').oninput = e => { const v = Math.max(1, Math.min(MAX_EUROS, parseInt(e.target.value || '0'))); $('#eurInput').value = v; applyStoreValues(v) };
+    $('#ap-points-input').oninput = e => { const v = Math.max(1, Math.min(MAX_EUROS, parseInt(e.target.value || '0'))); $('#eurInput').value = v; applyStoreValues(v) };
+
+    // Packs
+    function renderPackages() { const g = $('#view-packs'); g.innerHTML = '', g.classList.add('swap'); (CATALOG[state.currentTab] || []).slice(0, 8).forEach(p => { const el = document.createElement('article'); el.className = 'card'; el.innerHTML = `<div class="cover"><img src="${COVER_IMG(p.id)}" onerror="this.src='assets/billspack.jpg'"></div><div class="content"><div class="name">${p.name}${p.redbucks ? ` • ${p.redbucks} RB` : ''}${p.note ? ` • ${p.note}` : ''}</div><div class="price">€${(p.price_cents / 100).toFixed(2)}</div><div class="cta"><button class="buy">Cumpără</button></div></div>`; el.querySelector('.buy').onclick = () => state.authed ? buyPack('rbpack', { rb: p.redbucks }) : showLogin(); g.appendChild(el) }); setTimeout(() => g.classList.remove('swap'), 300) }
+    document.addEventListener('click', e => { const b = e.target.closest('.tab'); if (!b) return; document.querySelectorAll('.packs-head .tab').forEach(x => x.classList.remove('active')); b.classList.add('active'); state.currentTab = b.dataset.tab; renderPackages() });
+
+    // Stripe actions
+    async function stripeRedirect(id) { if (!stripe) await apiStripeConfig(); const { error } = await stripe.redirectToCheckout({ sessionId: id }); if (error) toast(error.message, 'err') }
+    async function buyPack(cat, p) { const r = await fetch('/api/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category: cat, ...p }) }), d = await r.json(); d.id ? stripeRedirect(d.id) : toast(d.error || 'Eroare', 'err') }
+    async function buyCustom() { const e = Math.max(1, Math.min(MAX_EUROS, parseInt($('#eurInput').value) || 1)); const r = await fetch('/api/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category: 'redbucks-custom', euros: e }) }), d = await r.json(); d.id ? stripeRedirect(d.id) : toast(d.error || 'Eroare', 'err') }
+    $('#btn-next-store').onclick = buyCustom; $('#btn-back-store').onclick = () => showView('home');
+
+    // ===== Avatar upload + setări cont =====
+    let _selFile = null;
+    $('#set-file').addEventListener('change', e => {
+      _selFile = e.target.files?.[0] || null;
+      $('#file-name').textContent = _selFile ? _selFile.name : 'Niciun fișier';
+      $('#btn-upload').style.display = _selFile ? '' : 'none';
+      if (_selFile) { const url = URL.createObjectURL(_selFile); setImg($('#set-avatar'), url); }
+    });
+    $('#btn-upload').addEventListener('click', async () => {
+      if (!_selFile) return;
+      const fd = new FormData(); fd.append('avatar', _selFile);
+      try {
+        const r = await fetch('/api/user/avatar', { method: 'POST', body: fd, credentials: 'include' }); const d = await r.json();
+        if (!r.ok || !d.ok) throw new Error(d?.error || 'upload');
+        toast('Avatar încărcat');
+        $('#btn-upload').style.display = 'none';
+        // reîmprospătează toate pozele
+        const u = d.url || '/api/profile-photo/me.png?ts=' + Date.now();
+        setImg($('#set-avatar'), u); setImg($('#set-charface'), u);
+        setImg($('#sidebar-avatar'), u); setImg($('#top-avatar'), u); setImg($('#hero-face'), u);
+      } catch { toast('Eroare la upload', 'err'); }
+    });
+    $('#btn-save').addEventListener('click', async () => {
+      const email = $('#set-email').value.trim();
+      const p1 = $('#set-pass').value, p2 = $('#set-pass2').value;
+      if (p1 || p2) { if (p1.length < 6) { toast('Parolă prea scurtă', 'err'); return } if (p1 !== p2) { toast('Parolele nu coincid', 'err'); return } }
+      try {
+        const r = await fetch('/api/user/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email, password: p1 || null }) });
+        const d = await r.json(); if (!r.ok || !d.ok) throw new Error(d?.error || 'update');
+        toast('Date salvate'); loadProfile();
+      } catch { toast('Eroare la salvare', 'err'); }
+    });
+
+    // Init
+    (async function init() { await apiStripeConfig(); const u = await me(); state.authed = !!u; updateAuthUI(); renderPackages(); showView('home'); if (!state.authed) showLogin() })(); if (state.authed) loadProfile();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ro">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Plată finalizată • Royal Arena RP</title>
+  <meta name="theme-color" content="#0b0d10">
+  <link rel="icon" href="/assets/favicon.ico">
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --card: #0f1320;
+      --text: #e7ebf0;
+      --muted: #8b95a1;
+      --stroke: rgba(212, 175, 55, .30);
+      --violet: #d4af37;
+      --violet-neon: #ffd700;
+      --violet-deep: #b8860b;
+      --ok: #2ecc71;
+      --err: #ff5d6c
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.45 system-ui
+    }
+
+    .wrap {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .wrap::before,
+    .wrap::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(600px 400px at 15% 20%, rgba(212, 175, 55, .25), transparent 60%), radial-gradient(700px 500px at 85% 80%, rgba(218, 165, 32, .22), transparent 60%);
+      filter: blur(40px);
+      pointer-events: none;
+      opacity: .75;
+      mix-blend-mode: screen
+    }
+
+    .wrap::after {
+      background: radial-gradient(520px 380px at 80% 25%, rgba(212, 175, 55, .28), transparent 60%), radial-gradient(540px 360px at 20% 75%, rgba(184, 134, 11, .22), transparent 60%)
+    }
+
+    #fx-stars,
+    #fx-confetti {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none
+    }
+
+    #fx-stars {
+      opacity: .5;
+      z-index: 0
+    }
+
+    #fx-confetti {
+      z-index: 1
+    }
+
+    .card {
+      position: relative;
+      z-index: 2;
+      width: min(680px, 94vw);
+      padding: 26px 22px 22px;
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, .55), 0 0 80px rgba(212, 175, 55, .20);
+      text-align: center;
+      animation: pop .28s ease
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 22px;
+      padding: 2px;
+      background: conic-gradient(from 0deg, rgba(212, 175, 55, .00), rgba(212, 175, 55, .35), rgba(212, 175, 55, .45), rgba(184, 134, 11, .35), rgba(212, 175, 55, .00));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(.98)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .title {
+      margin: 8px 0 4px;
+      font-weight: 900;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      text-shadow: 0 0 30px rgba(212, 175, 55, .35), 0 0 8px rgba(212, 175, 55, .45)
+    }
+
+    .lead {
+      margin: 0 0 14px;
+      color: var(--muted)
+    }
+
+    .checkwrap {
+      display: grid;
+      place-items: center;
+      margin: 6px 0 12px;
+      height: 88px
+    }
+
+    .check {
+      color: #d9ffe6;
+      font-size: 56px;
+      line-height: 1;
+      filter: drop-shadow(0 0 14px rgba(46, 204, 113, .45));
+      opacity: 0;
+      transform: scale(.9);
+      animation: showCheck .45s .1s ease forwards
+    }
+
+    @keyframes showCheck {
+      to {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    #msg {
+      margin: 6px auto 14px;
+      font-size: 18px
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 10px 0 6px
+    }
+
+    .btn {
+      position: relative;
+      overflow: hidden;
+      border: 0;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--violet-neon), var(--violet));
+      color: #fff;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 30px rgba(212, 175, 55, .40), 0 0 0 1px rgba(212, 175, 55, .35) inset;
+      transition: transform .08s, box-shadow .25s, filter .25s
+    }
+
+    .btn:hover {
+      box-shadow: 0 14px 38px rgba(212, 175, 55, .55), 0 0 0 1px rgba(255, 255, 255, .08) inset
+    }
+
+    .btn:active {
+      transform: scale(.985)
+    }
+
+    .btn.secondary {
+      background: rgba(16, 20, 30, .7);
+      box-shadow: none;
+      border: 1px solid var(--stroke);
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 700
+    }
+
+    .btn .r {
+      position: absolute;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      width: 12px;
+      height: 12px;
+      opacity: .65;
+      background: radial-gradient(circle, rgba(255, 255, 255, .65) 0%, rgba(255, 255, 255, .15) 40%, transparent 70%);
+      animation: rip 700ms ease-out forwards
+    }
+
+    @keyframes rip {
+      to {
+        width: 500px;
+        height: 500px;
+        opacity: 0
+      }
+    }
+
+    .ok {
+      color: var(--ok)
+    }
+
+    .err {
+      color: var(--err)
+    }
+
+    .hidden {
+      display: none !important
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <canvas id="fx-stars" aria-hidden="true"></canvas>
+    <canvas id="fx-confetti" aria-hidden="true"></canvas>
+    <section class="card" aria-live="polite">
+      <div class="checkwrap">
+        <div class="check" id="icon">✓</div>
+      </div>
+      <h1 class="title">Plată finalizată</h1>
+      <p class="lead">Confirmăm plata și credităm Redbucks în contul tău.</p>
+      <div id="msg">Verificare în curs<span id="dots">...</span></div>
+      <div class="actions">
+        <a class="btn" href="/index.html" id="btn-home">Înapoi acasă</a>
+        <a class="btn secondary" href="/index.html#store" id="btn-store">Deschide magazinul</a>
+      </div>
+      <p class="muted" id="hint"></p>
+    </section>
+  </div>
+
+  <script>
+    // ripple
+    document.addEventListener('click', e => {
+      const b = e.target.closest('.btn'); if (!b) return;
+      const r = document.createElement('span'); r.className = 'r';
+      const rect = b.getBoundingClientRect();
+      r.style.left = (e.clientX - rect.left) + 'px';
+      r.style.top = (e.clientY - rect.top) + 'px';
+      b.appendChild(r); setTimeout(() => r.remove(), 720);
+    });
+
+    // stars
+    (function stars() {
+      const c = document.getElementById('fx-stars'); if (!c) return;
+      const ctx = c.getContext('2d');
+      let W = 0, H = 0, stars = [];
+      const resize = () => {
+        W = c.width = c.offsetWidth;
+        H = c.height = c.offsetHeight;
+        stars = Array.from({ length: 90 }, () => ({
+          x: Math.random() * W, y: Math.random() * H,
+          z: Math.random() * 0.8 + 0.2, r: Math.random() * 1.5 + 0.4, a: Math.random() * 0.6 + 0.2
+        }));
+      };
+      const step = () => {
+        ctx.clearRect(0, 0, W, H);
+        for (const s of stars) {
+          s.x += 0.06 * s.z; s.y -= 0.03 * s.z;
+          if (s.x > W + 10) s.x = -10; if (s.y < -10) s.y = H + 10;
+          ctx.globalAlpha = s.a;
+          ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(200,180,255,1)'; ctx.fill();
+          const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
+          g.addColorStop(0, 'rgba(200,180,255,.28)'); g.addColorStop(1, 'rgba(200,180,255,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 4, 0, Math.PI * 2); ctx.fill();
+        }
+        requestAnimationFrame(step);
+      };
+      new ResizeObserver(resize).observe(c); resize(); step();
+    })();
+
+    // confetti
+    function confettiFloat() {
+      const c = document.getElementById('fx-confetti'); if (!c) return;
+      const ctx = c.getContext('2d');
+      let W = 0, H = 0, DPR = Math.max(1, devicePixelRatio || 1), pcs = [];
+      const resize = () => {
+        const w = c.offsetWidth, h = c.offsetHeight;
+        W = w; H = h; c.width = W * DPR; c.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        const N = innerWidth < 600 ? 90 : 150;
+        pcs = Array.from({ length: N }, () => {
+          const sz = 6 + Math.random() * 10;
+          return { x: Math.random() * W, y: Math.random() * H * 0.6, w: sz * 0.6, h: sz, rot: Math.random() * Math.PI, vx: (-0.5 + Math.random()) * 0.6, vy: 0.25 + Math.random() * 0.55, hue: Math.floor(Math.random() * 360), sway: 0.6 + Math.random() * 0.8, spin: (Math.random() * 2 - 1) * 0.03, t: Math.random() * Math.PI * 2 };
+        });
+      };
+      const step = () => {
+        ctx.clearRect(0, 0, W, H);
+        for (const p of pcs) {
+          p.t += 0.02 * p.sway; p.x += p.vx + Math.cos(p.t) * 0.4; p.y += p.vy + Math.sin(p.t * 0.9) * 0.2; p.rot += p.spin;
+          if (p.x < -24) p.x = W + 24; if (p.x > W + 24) p.x = -24; if (p.y < -24) p.y = H + 24; if (p.y > H + 24) p.y = -24;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = `hsl(${p.hue},90%,60%)`; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+        }
+        requestAnimationFrame(step);
+      };
+      new ResizeObserver(resize).observe(c); resize(); step();
+    }
+
+    // dots
+    (function dots() { const el = document.getElementById('dots'); if (!el) return; let t = 0; setInterval(() => { t = (t + 1) % 4; el.textContent = '.'.repeat(t) }, 350) })();
+
+    // confirm
+    (async function confirm() {
+      const q = new URLSearchParams(location.search);
+      const sid = q.get('sid');
+      const msg = document.getElementById('msg');
+      const hint = document.getElementById('hint');
+      const icon = document.getElementById('icon');
+      if (!sid) { msg.innerHTML = '<span class="err">Lipsește sesiunea de plată.</span>'; if (icon) icon.textContent = '!'; return; }
+      try {
+        const r = await fetch('/api/checkout/confirm?sid=' + encodeURIComponent(sid));
+        const d = await r.json();
+        if (/checkout\.stripe\.com/.test(document.referrer || '')) hint.textContent = 'Poți închide fereastra Stripe.';
+        if (d.ok) {
+          if (icon) icon.textContent = '✓';
+          confettiFloat();
+          if (d.credited && Number.isFinite(+d.redbucks)) {
+            msg.innerHTML = `✅ <strong>${Number(d.redbucks).toLocaleString('ro-RO')}</strong> RB au fost creditați pentru <strong>${d.login || 'contul tău'}</strong>.`;
+          } else {
+            msg.textContent = 'RB erau deja creditați. Mulțumim!';
+          }
+        } else {
+          if (icon) icon.textContent = '!'; msg.innerHTML = `<span class="err">Eroare confirmare: ${d.error || d.status || 'necunoscută'}</span>`;
+        }
+      } catch {
+        if (icon) icon.textContent = '!'; msg.innerHTML = '<span class="err">Eroare rețea.</span>';
+      }
+    })();
+  </script>
+</body>
+
+</html>

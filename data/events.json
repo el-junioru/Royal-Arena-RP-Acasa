@@ -1,0 +1,20 @@
+{
+  "events": [
+    {
+      "id": "truffade",
+      "title": "Giveaway Truffade Nero Profile",
+      "image": "/assets/billspack.jpg",
+      "when": "04.09.2025, 11:01",
+      "description": "Câștigă un supercar exclusiv. Joacă 20 ore în următoarele 2 săptămâni.",
+      "participants": []
+    },
+    {
+      "id": "noul_event",
+      "title": "Noul eveniment",
+      "image": "/assets/event.jpg",
+      "when": "10.10.2025, 20:00",
+      "description": "Descriere scurtă a evenimentului.",
+      "participants": []
+    }
+  ]
+}
