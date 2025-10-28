@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ro-RO">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Royal Arena RP - Acasă</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link href="css/animate.min.css" rel="stylesheet">
+  <link href="css/reset.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <link href="css/responsive.v3.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="modal-window successRegistration" id="successRegistration">
+    <div class="modal-box no-bg">
+      <p class="modal-box-header">V-ați<br>înregistrat cu succes<span>vă așteptăm în joc!</span></p>
+      <div class="modal-box-buttons"><a href="#" class="button-modal-box">Înțeles</a></div>
+    </div>
+  </div>
+
+  <div class="modal-window successDonate" id="successDonate">
+    <div class="modal-box no-bg">
+      <p class="modal-box-header">Ați<br><span>alimentat cu succes contul!</span><span
+          class="modal-small-header">Apăsați butonul „Verifică alimentarea” dacă sunteți în joc.</span></p>
+      <div class="modal-box-buttons"><a href="#" class="button-modal-box">Înțeles</a></div>
+    </div>
+  </div>
+
+  <div class="modal-window question" id="question">
+    <div class="modal-box">
+      <a href="#" class="modal-box-close" onclick="document.getElementById('question').style=''"></a>
+      <p class="modal-box-header">Confirmați<br>acțiunea<span>Aveți GTA V licențiată?</span></p>
+      <div class="modal-box-buttons">
+        <a href="#registration" class="button-modal-box small">Da</a>
+        <a href="https://store.steampowered.com/app/271590/Grand_Theft_Auto_V/" class="button-modal-box small red"
+          target="_blank">Nu</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-window register" id="registration">
+    <div class="modal-box">
+      <a href="#" class="modal-box-close"></a>
+      <p class="modal-box-header">Înregistrare<span>Cont de joc</span></p>
+      <form method="post" id="registrationForm">
+        <div class="modal-box-content">
+          <div class="modal-box-input">
+            <div class="modal-box-change-server">
+              <p>Selectați serverul</p>
+              <div>
+                <input class="radio-server" name="server" type="radio" value="one_reg" id="one_reg"><label
+                  for="one_reg"><img src="images/svg/one1.svg" alt=""></label>
+                <input class="radio-server" name="server" type="radio" value="two_reg" id="two_reg"><label
+                  for="two_reg"><img src="images/svg/two1.svg" alt=""></label>
+              </div>
+            </div>
+          </div>
+          <input type="text" class="modal-box-input" placeholder="Prenume în joc" name="firstname" required>
+          <input type="text" class="modal-box-input" placeholder="Nume în joc" name="lastname" required>
+          <input type="email" class="modal-box-input" placeholder="E-mailul dvs." name="email" required>
+          <input type="text" class="modal-box-input" placeholder="Parolă" name="password" required>
+          <input type="text" class="modal-box-input" placeholder="Repetați parola" name="repeatpassword" required>
+          <label for="username" name="captcha" required></label>
+          <div align="center" class="g-recaptcha" data-sitekey="6LfBvXsUAAAAABa04Ujo44mKaG8GAIK-OrczE_Xj"></div>
+        </div>
+        <div class="modal-box-buttons"><button class="button-modal-box" type="submit">Înregistrare</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-window donate" id="donate">
+    <div class="modal-box">
+      <a href="#" class="modal-box-close"></a>
+      <form method="post" id="donateForm">
+        <p class="modal-box-header">Alimentare<span>Cont de joc</span></p>
+        <div class="modal-box-content">
+          <div class="modal-box-input">
+            <div class="modal-box-change-server">
+              <p>Selectați serverul</p>
+              <div>
+                <input class="radio-server" name="server" type="radio" value="one_donate" id="one_donate"><label
+                  for="one_donate"><img src="images/svg/one1.svg" alt=""></label>
+                <input class="radio-server" name="server" type="radio" value="two_donate" id="two_donate"><label
+                  for="two_donate"><img src="images/svg/two1.svg" alt=""></label>
+              </div>
+            </div>
+          </div>
+          <input type="text" class="modal-box-input" placeholder="Numărul contului" name="donate_id" required>
+          <input type="text" class="modal-box-input" placeholder="Sumă" name="donate_value" required>
+        </div>
+        <div class="modal-box-buttons"><button class="button-modal-box" type="submit">Alimentează</button></div>
+      </form>
+    </div>
+  </div>
+
+  <header>
+    <video class="bg-video" autoplay muted loop playsinline preload="auto" poster="images/header-bg.jpg">
+      <source src="images/bg.mp4" type="video/mp4">
+    </video>
+    <noscript>
+      <div class="bg-fallback"></div>
+    </noscript>
+
+    <div class="topline">
+      <div class="container">
+        <div class="topline-wrap">
+          <a href="#" class="logo-wrap">
+            <div class="logo"><img src="images/logo.png" alt=""></div>
+            <p class="desc">ROYAL ARENA RP<br>RAGE <span>multiplayer</span></p>
+          </a>
+          <ul class="header-menu">
+            <li class="active"><a href="index.html">Pagina principală</a></li>
+            <li><a href="#staps">Cum să începi să joci</a></li>
+            <li><a href="http://panel.royalarenrp.ro"><i class="donate"></i>PANEL</a></li>
+            <li><a href="https://forum.grand-rp.su/" target="_blank">Forum</a></li>
+            <li><a href="https://vk.com/im?media=&sel=478836671" target="_blank">Suport</a></li>
+            <li><a href="https://www.youtube.com/@RoyalArenaRP" target="_blank"><i class="youtube"></i>Youtube</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <i class="girl-header"></i>
+
+    <div class="container">
+      <div class="info-server">
+        <p>royal arena roleplay</p>
+        <p class="small">ROYAL ARENA RP nu are limite și vă oferă control complet asupra vieții voastre. Singura limită
+          este imaginația voastră!</p>
+        <div class="quality-server">
+          <div>12 <span>facțiuni<br>deschise</span></div>
+          <div>99+ <span>tipuri<br>de activități</span></div>
+          <div>100% <span>progres<br>fără donații</span></div>
+        </div>
+        <div class="buttons-info-server">
+          <a href="http://panel.royalarenarp.ro" class="main-button">INTRă PE CONT<span>Nu durează mai mult de 5
+              minute</span></a>
+          <a href="https://www.youtube.com/watch?v=T0vJp_fRg6M" class="main-button youtube" target="_blank">
+            <div>despre noi<span>În 2 minute</span></div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="game-servers">
+      <div class="container small">
+        <div class="header-text">
+          <p><span class="big"></span></p>
+          <p class="online">server</p>
+        </div>
+        <div class="server one">
+          <p>ROYAL<br>ARENA</p>
+          <a class="main-button copy" data-clipboard-text="91.200.220.66:22005">Copiază IP</a>
+          <div class="online">server <span>online</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="about" class="about-sec">
+      <div class="container small">
+        <h2 class="about-title">Despre proiect</h2>
+
+        <div class="about-pane active" id="tab-roleplay">
+          <div class="about-grid">
+            <div class="about-col">
+              <p>Bun venit pe <b>ROYAL ARENA RP</b>, server hard roleplay pe RAGE cu experiență realistă și reguli
+                clare.</p>
+              <p>Mai jos, pe scurt, ce oferim:</p>
+              <p><b>Roleplay avansat</b>, interacțiuni credibile și consecințe reale pentru fiecare acțiune.</p>
+              <p><b>Economie echilibrată</b>, joburi, afaceri și piețe dinamice pentru a-ți scrie povestea.</p>
+            </div>
+            <div class="about-col media">
+              <div class="about-card">
+                <div class="carousel" data-carousel="rp1">
+                  <img src="images/dj.png" alt="">
+                  <img src="images/gang.png" alt="">
+                  <img src="images/lonely.png" alt="">
+                  <div class="dots"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="about-grid alt">
+            <div class="about-col media">
+              <div class="about-card">
+                <div class="carousel" data-carousel="rp2">
+                  <img src="images/avion.png" alt="">
+                  <img src="images/phone.webp" alt="">
+                  <img src="images/bike.png" alt="">
+                  <div class="dots"></div>
+                </div>
+              </div>
+            </div>
+            <div class="about-col">
+              <p><b>Legal sau ilegal?</b> Alege între cetățean model, agent al legii sau infractor isteț.</p>
+              <p><b>Personalizări unice</b>, mașini, case și accesorii pentru un personaj distinct.</p>
+              <p><b>Comunitate activă și suport</b>, administrare eficientă și experiență plăcută în joc.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-pane" id="tab-evenimente">
+          <div class="about-grid">
+            <div class="about-col">
+              <p><b>Evenimente săptămânale</b>, premii și provocări tematice.</p>
+              <p><b>Turnee</b> PvP, curse și activități de echipă.</p>
+            </div>
+            <div class="about-col media">
+              <div class="about-card">
+                <div class="carousel" data-carousel="evt1">
+                  <img src="images/boat-server.png" alt="">
+                  <img src="images/tank-server.png" alt="">
+                  <img src="images/server-bg-two.png" alt="">
+                  <div class="dots"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="how-start-game">
+      <div class="container small staps" id="staps">
+        <p class="title">Cum să începi jocul<span>ghid rapid</span></p>
+        <div class="guide-staps">
+          <div class="stap-1">
+            <i class="lines-stap-1"></i><span>pasul 1</span>
+            <p class="title-stap">Cumpără<br>versiunea licențiată<br>GTA V</p>
+            <p class="description-stap">Dacă jocul este deja cumpărat — mergi la pasul următor</p>
+            <a href="https://store.steampowered.com/app/271590/Grand_Theft_Auto_V/" class="main-button guide steam"
+              target="_blank">Cumpără pe Steam</a>
+          </div>
+          <div class="stap-2">
+            <i class="lines-stap-2"></i><span>pasul 2</span>
+            <p class="title-stap">Instalează<br>și pornește<br>Rage MP</p>
+            <a href="https://cdn.rage.mp/public/files/RAGEMultiplayer_Setup.exe"
+              class="main-button guide ragemp">Descarcă launcher-ul</a>
+          </div>
+          <div class="stap-3">
+            <span>pasul 3</span>
+            <p class="title-stap">INTRă<br>PE<br>DISCORD</p>
+            <a href="https://discord.gg/9w7jkA9e4X" class="main-button guide grp">DISCORD</a>
+          </div>
+          <div class="stap-4">
+            <i class="lines-stap-4"></i>
+            <p class="title-stap">Găsește Grand<br>Role Play</p>
+            <p class="description-stap">În lista de servere sau conectează-te prin “Direct Connect/Conectare” folosind
+              IP-ul serverului</p>
+            <span>pasul 4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container small">
+      <div class="social-links">
+        <a href="https://vk.com/grandrpgta5" class="link public" target="_blank">
+          <p>Pagină<br>VK</p>
+          <div class="side-box">
+            <ul class="people">
+              <li class="active"></li>
+              <li></li>
+              <li></li>
+              <li></li>
+              <li></li>
+              <li></li>
+            </ul>
+            <div class="count">52 000+</div>
+          </div>
+        </a>
+        <a href="https://www.youtube.com/@RoyalArenaRP" class="link youtube" target="_blank">
+          <p>Canal<br>Youtube</p>
+          <div class="side-box">
+            <ul class="people">
+              <li class="active"></li>
+              <li class="active"></li>
+              <li class="active"></li>
+              <li class="active"></li>
+              <li></li>
+              <li></li>
+            </ul>
+            <div class="count">CANAL</div>
+          </div>
+        </a>
+        <a href="https://vk.com/grandrpsampfun" class="link public" target="_blank">
+          <p>Comunitate<br>liberă</p>
+          <div class="side-box">
+            <ul class="people">
+              <li class="active"></li>
+              <li class="active"></li>
+              <li></li>
+              <li></li>
+              <li></li>
+              <li></li>
+            </ul>
+            <div class="count">10 000+</div>
+          </div>
+        </a>
+        <a href="https://discord.gg/9w7jkA9e4X" target="_blank" class="link discord">
+          <p>Comunitate<br>Discord</p>
+          <div class="side-box">
+            <ul class="people">
+              <li class="active"></li>
+              <li class="active"></li>
+              <li class="active"></li>
+              <li></li>
+              <li></li>
+              <li></li>
+            </ul>
+            <div class="count">SERVER</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="copyright">
+        <div class="logo-wrap">
+          <div class="logo"><img src="images/logo.png" alt=""></div>
+          <p class="desc">ROYAL ARENA RP<br>RAGE <span>multiplayer</span></p>
+        </div>
+        <p class="protection">© toate drepturile rezervate<br>Orice copiere a materialului este interzisă</p>
+      </div>
+    </div>
+
+    <script>
+      (function (m, e, t, r, i, k, a) { m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) }; m[i].l = 1 * new Date(); k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a) })
+        (window, document, "script", "https://cdn.jsdelivr.net/npm/yandex-metrica-watch/tag.js", "ym");
+      ym(46328574, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true, trackHash: true, ecommerce: "dataLayer" });
+    </script>
+  </footer>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/jquery.form.js"></script>
+  <script src="js/clipboard.min.js"></script>
+  <script src="js/script.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js"></script>
+  <script src="js/push.js"></script>
+</body>
+
+</html>
