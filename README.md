@@ -4,3 +4,5 @@ Rage:MP Website panel for server with donations, packs and much more included.
 
 
 BETA, English coming soon?
+
+New Shop And Prices!
